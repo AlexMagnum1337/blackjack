@@ -4,13 +4,34 @@
 #include <conio.h>
 using namespace std;
 
-void endGame(int &w/*Win condition*/, int &m/*Player's money*/, int &b/*Bet*/)   // Some money should be involved
+/*class leadBrd
+{
+public:
+    string name;
+    int hiScore;
+    leadBrd(string x, int y)
+    {
+        setScore(x,y);
+    }
+    void setScore(string x, int y)
+    {
+        name = x;
+        hiScore = y;
+    }
+    void showScore()
+    {
+        cout << name << "       " << hiScore << endl;
+    }
+};*/
+
+void endGame(int &w/*Win condition*/, int &m/*Player's money*/, int &b/*Bet*/, int &c/*Score*/)
 {
     switch (w)
     {
     case 1:
         cout << "You win!\n";
         m+=b*2;
+        c+=b;
         break;
     case 2:
         cout << "You lose.\n";
@@ -34,7 +55,7 @@ void pullingCard(int &x/*Score*/, int (&y)[52]/*Deck*/)
         a=rand()%51;    // "Pulling" card from the deck and adding a score afterwards
         if (y[a]!=0)
         {
-            if (y[a]==11)   // In case this is Ace
+            if (y[a]==11)   // In case this is an Ace
             {
                 if (x<=10){x += y[a];}
                 else {x+=1;}
@@ -65,7 +86,7 @@ void startGame(int &x/*Score*/, int &x1/*Opponent score*/, int (&y)[52]/*Deck*/,
         cout << "Both players got blackjack. ";
         _sleep(1200);
         w = 3;
-        _sleep(2000);       // There must be logic to start next round. Same with other if cases.
+        _sleep(2000);
     }
     else if (x==21)
     {
@@ -132,6 +153,23 @@ void CPU(int &x/*Score*/, int &x1/*Opponent score*/ , int (&y)[52]/*Deck*/, int 
     }
 }
 
+void LB_check(string x/*Name of a player*/, int y/*Score*/, string (&a)[5]/*Leaderboard name*/, int (&b)[5]/*Leaderboard score*/)
+{
+    for (int c=4; c>=0; c--)
+    {
+        if (y>b[c]){
+            if (y<b[c-1] || c==0){
+                a[c]=x;
+                b[c]=y;
+            }
+            else {
+                a[c]=a[c-1];
+                b[c]=b[c-1];
+            }
+    }
+}
+}
+
 void shuffle(int x[52], int (&y)[52], int &a, int &b)
 {
     for (int a=0; a<52; a++)
@@ -146,10 +184,21 @@ int main()
 {
     srand(time(0));
 
+    /*leadBrd _1stplace("Jack", 500);
+    leadBrd _2ndplace("Tyler", 400);
+    leadBrd _3rdplace("Cory", 300);
+    leadBrd _4thplace("Bryan", 200);
+    leadBrd _5thplace("Adrian",100);*/
+
+    string lB_name[5] = {"Jack", "Tyler" , "Cory", "Bryan", "Adrian"};
+    int lB_score[5] = {500, 400, 300, 200, 100};
+
     int cardsMain[52]={2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11};    //yes
     int cards[52]={2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11};    // Use this deck for play, cardsMain is for shuffling
+    string name;
     int scorePlayer=0;
     int scoreOppnt=0;
+    int hiScore = 0;
     int money = 100;
     int bet = 0;
     int choice=0;
@@ -164,7 +213,7 @@ int main()
             while (true) {
             cout << "Place your bet             Your money: " << money << endl;
             cout << ">> ";
-            cin>>bet;       // Need insufficient money logic
+            cin>>bet;
             if (bet>money) {cout << "Insufficient money"; _sleep(1200); bet = 0; system("cls");}
             else if (bet<1) {bet=1; money-=bet; break;}
             else {money-=bet; break;}
@@ -172,7 +221,7 @@ int main()
             system ("cls");
             startGame(scorePlayer, scoreOppnt, cards, winCond);
             if (winCond!=0) {break;}
-            while (choice!=2) {
+            while (true) {
                 cout << "Your turn\n";
                 cout << "Score: " << scorePlayer << "       Money: " << money << "  Bet: " << bet << endl;
                 cout << "1. Hit         2. Pass\n";
@@ -193,7 +242,7 @@ int main()
         }
         if (scorePlayer==scoreOppnt) {winCond=3;}
         else if (scoreOppnt>scorePlayer && scoreOppnt<=21) {winCond=2;}
-        endGame(winCond, money, bet);
+        endGame(winCond, money, bet, hiScore);
         shuffle(cardsMain, cards, scorePlayer, scoreOppnt);
         winCond = 0;
         choice = 0;
@@ -203,6 +252,17 @@ int main()
     _sleep(2000);
     cout << "Game over.\n";
     _sleep(2000);
+    cout << "Enter your name: \n";
+    cout << ">> ";
+    cin>>name;
+    LB_check(name, hiScore, lB_name, lB_score);
+    cout << "   Name        Score\n";
+    cout << "1: " << lB_name[0] << " " << lB_score[0] << endl;
+    cout << "2: " << lB_name[1] << " " << lB_score[1] << endl;
+    cout << "3: " << lB_name[2] << " " << lB_score[2] << endl;
+    cout << "4: " << lB_name[3] << " " << lB_score[3] << endl;
+    cout << "5: " << lB_name[4] << " " << lB_score[4] << endl;
+    _getch();
 
     return 0;
 }
